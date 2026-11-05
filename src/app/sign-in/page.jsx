@@ -34,6 +34,15 @@ export default function SignInPage() {
     console.log("Sign in:", form);
     setTimeout(() => setLoading(false), 800);
   };
+  const handleGoogle = async () => {
+    setLoading(true);
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/",
+    });
+    // The browser leaves for Google here, so there is no code after this.
+    setLoading(false);
+  };
 
   return (
     <main className="grid min-h-[calc(100vh-73px)] bg-stone-950 lg:grid-cols-2">
@@ -153,6 +162,7 @@ export default function SignInPage() {
           </form>
 
           <button
+            onClick={handleGoogle}
             type="button"
             className="mt-4 flex w-full items-center justify-center gap-3 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-sm font-semibold text-white backdrop-blur-md transition hover:border-amber-300/50 hover:bg-white/10"
           >
