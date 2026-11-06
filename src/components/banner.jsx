@@ -108,7 +108,7 @@ export default function Banner() {
                     style={{ animationDelay: "0.45s" }}
                   >
                     <Link
-                      href="/books"
+                      href="/All-Books"
                       className="group inline-flex items-center gap-3 rounded-full bg-amber-400 px-8 py-4 text-sm font-bold uppercase tracking-wider text-stone-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-amber-400/50"
                     >
                       Browse Books

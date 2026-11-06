@@ -2,17 +2,25 @@
 import React from "react";
 import { authClient } from "@/lib/auth-client";
 
-const BorrowButton = ({book}) => {
+const BorrowButton =  ({book}) => {
   const { data: session } = authClient.useSession();
   const user = session?.user;
 
-  const handleBorrow = () => {
+  const handleBorrow = async() => {
     const data = {
       user: user.name,
       email: user.email,
       ...book,
     };
-    console.log(data);
+      const res = await fetch('http://localhost:5000/Books', {
+          method: 'POST',
+          headers: {
+              'Content-Type':'application/json'
+          },
+          body:JSON.stringify(data)
+      })
+      const result = await res.json()
+      console.log(result);
   };
   return (
     <div>

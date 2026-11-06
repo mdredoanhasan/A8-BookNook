@@ -80,7 +80,6 @@ const BookDetailsContent = async ({ params }) => {
                 </p>
               </div>
             </div>
-
             <BorrowButton book={book} />
           </div>
         </div>
