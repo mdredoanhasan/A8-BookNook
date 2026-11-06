@@ -26,7 +26,7 @@ const BookDetailsContent = async ({ params }) => {
           {/* Image */}
           <div className="relative mx-auto w-full max-w-md lg:max-w-none">
             <div className="absolute -bottom-4 -right-4 h-full w-full rounded-3xl border border-amber-300/40" />
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-stone-900 shadow-2xl shadow-black/40">
+            <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-stone-900 shadow-2xl shadow-black/40">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={book.image}
