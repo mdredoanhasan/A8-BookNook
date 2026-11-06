@@ -30,22 +30,15 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const user = Object.fromEntries(formData.entries());
-
-    const { data, error } = await authClient.signUp.email({
-      ...user,
-    });
-
-    if (data) {
-      redirect("/");
-    }
-    if (error) {
-      console.log(error);
-    }
 
     if (form.password.length < 6) {
       return setError("Password must be at least 6 characters.");
+    }
+    if (!/[A-Z]/.test(form.password)) {
+      return setError("Password must contain at least one uppercase letter.");
+    }
+    if (!/[a-z]/.test(form.password)) {
+      return setError("Password must contain at least one lowercase letter.");
     }
     if (form.password !== form.confirm) {
       return setError("Passwords do not match.");
@@ -55,8 +48,27 @@ export default function SignUpPage() {
     }
 
     setLoading(true);
-    console.log("Sign up:", { name: form.name, email: form.email });
-    setTimeout(() => setLoading(false), 800);
+    const formData = new FormData(e.currentTarget);
+    const user = Object.fromEntries(formData.entries());
+    let result;
+
+    try {
+      result = await authClient.signUp.email({ ...user });
+    } catch (err) {
+      console.error("Sign up failed:", err);
+      setError("Could not create your account. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
+    if (result.error) {
+      setError(result.error.message || "Could not create your account.");
+      return;
+    }
+    if (result.data) {
+      redirect("/");
+    }
   };
 
   const handleGoogle = async () => {
