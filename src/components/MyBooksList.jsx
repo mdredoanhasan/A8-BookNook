@@ -12,20 +12,41 @@ const labelClass = "mb-2 block text-sm font-medium text-stone-300";
 
 const MyBooksList = ({ books }) => {
   const [list, setList] = useState(
-    Array.isArray(books) ? books.filter(Boolean) : []
+    Array.isArray(books) ? books.filter(Boolean) : [],
   );
   const [editBook, setEditBook] = useState(null);
   const [deleteBook, setDeleteBook] = useState(null);
   const [toast, setToast] = useState("");
+
+  // never contains null, even after a hot reload
+  const safeList = list.filter(Boolean);
 
   const showToast = (text) => {
     setToast(text);
     setTimeout(() => setToast(""), 3000);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    // TODO: send the new data to the server (PATCH /books/:id)
+
+    const id = editBook?._id;
+
+    // title, author, category and description from the form
+    const updatedData = Object.fromEntries(new FormData(e.target).entries());
+
+    await fetch(`http://localhost:5000/Books/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedData),
+    });
+
+    // update the card on the screen
+    setList((prev) =>
+      prev.map((book) =>
+        book?._id === id ? { ...book, ...updatedData } : book,
+      ),
+    );
+
     setEditBook(null);
     showToast("Book updated successfully!");
   };
@@ -46,7 +67,7 @@ const MyBooksList = ({ books }) => {
   return (
     <>
       {/* Empty state or cards */}
-      {list.length === 0 ? (
+      {safeList.length === 0 ? (
         <div className="mt-12 rounded-3xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur-md">
           <p className="text-stone-300">You have not added any book yet.</p>
           <Link
@@ -58,7 +79,7 @@ const MyBooksList = ({ books }) => {
         </div>
       ) : (
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((book) => (
+          {safeList.map((book) => (
             <div
               key={book._id}
               className="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-amber-300/40 hover:shadow-xl hover:shadow-amber-500/10"

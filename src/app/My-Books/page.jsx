@@ -1,17 +1,23 @@
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import React from "react";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import MyBooksList from "@/components/MyBooksList";
 
 const MyBooksContent = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
   const email = session?.user?.email;
 
+  if (!email) redirect("/sign-in");
+
   const res = await fetch(`http://localhost:5000/My-Books/${email}`, {
     cache: "no-store",
   });
-  const mybooks = await res.json();
+  const data = await res.json();
+  console.log("MYBOOKS RAW:", data);
+
+  // remove null items, and use an empty list if the server sent something else
+  const mybooks = Array.isArray(data) ? data.filter(Boolean) : [];
 
   return (
     <main className="relative overflow-hidden bg-stone-950 px-6 py-16">
@@ -41,9 +47,7 @@ const MyBooksPage = () => {
   return (
     <Suspense
       fallback={
-        <p className="bg-stone-950 p-10 text-center text-stone-400">
-          Loading...
-        </p>
+        <p className="bg-stone-950 p-10 text-center text-stone-400">Loading...</p>
       }
     >
       <MyBooksContent />
