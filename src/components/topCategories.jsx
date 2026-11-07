@@ -14,7 +14,7 @@ export default function AboutBookNook() {
       {/* Decorative background */}
       <div className="pointer-events-none absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-amber-400/10 blur-3xl" />
       <span
-        className="pointer-events-none absolute -right-6 -top-10 select-none text-[16rem] font-bold leading-none text-white/[0.03] md:text-[22rem]"
+        className="pointer-events-none absolute -right-6 -top-10 select-none text-[16rem] font-bold leading-none text-white/3 md:text-[22rem]"
         style={{ fontFamily: "Georgia, serif" }}
       >
         B
@@ -24,10 +24,10 @@ export default function AboutBookNook() {
         {/* Image side */}
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
           {/* Glow + offset frame */}
-          <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-amber-400/20 via-transparent to-transparent blur-2xl" />
+          <div className="absolute -inset-6 rounded-[2.5rem] bg-linear-to-br from-amber-400/20 via-transparent to-transparent blur-2xl" />
           <div className="absolute -bottom-5 -right-5 h-full w-full rounded-3xl border border-amber-300/40" />
 
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-2xl shadow-black/40">
+          <div className="relative aspect-4/5 overflow-hidden rounded-3xl shadow-2xl shadow-black/40">
             <Image
               src="https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=1200&q=80"
               alt="A person reading an open book"
@@ -35,7 +35,7 @@ export default function AboutBookNook() {
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-cover transition-transform duration-700 hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-stone-950/60 via-transparent to-transparent" />
           </div>
 
           {/* Floating glass badge */}
@@ -67,7 +67,7 @@ export default function AboutBookNook() {
             <span className="text-amber-300">readers share.</span>
           </h2>
 
-          <p className="mt-7 max-w-xl leading-relaxed text-stone-300 first-letter:float-left first-letter:mr-3 first-letter:text-6xl first-letter:font-bold first-letter:leading-[0.85] first-letter:text-amber-300 first-letter:[font-family:Georgia,serif]">
+          <p className="mt-7 max-w-xl leading-relaxed text-stone-300 first-letter:float-left first-letter:mr-3 first-letter:text-6xl first-letter:font-bold first-letter:leading-[0.85] first-letter:text-amber-300 first-letter:font-[Georgia,serif]">
             BookNook is a small online library built on a simple idea: books are
             meant to be read, not to sit quietly on a shelf. Readers add the
             books they love, and other readers borrow them for a few days.

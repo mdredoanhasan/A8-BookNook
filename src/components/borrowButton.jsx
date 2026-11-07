@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "@/components/ui/toast";
 import {
@@ -14,8 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authFetch } from "@/lib/authFetch";
+import { apiUrl } from "@/lib/api-url";
 
 const BorrowButton = ({ book }) => {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
   const user = session?.user;
   const totalCopies = Number(
@@ -52,7 +55,7 @@ const BorrowButton = ({ book }) => {
         returnDate: next7.toISOString(),
       };
 
-      const res = await authFetch("http://localhost:5000/Books", {
+      const res = await authFetch(apiUrl("/Books"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -67,6 +70,7 @@ const BorrowButton = ({ book }) => {
 
       setAvailableCopies((copies) => Math.max(0, copies - 1));
       setOpen(false);
+      router.refresh();
       toast.add({
         title: "Book borrowed",
         description: "The book was added to your borrows.",
@@ -99,13 +103,11 @@ const BorrowButton = ({ book }) => {
         </span>
       </p>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <button
-            disabled={availableCopies <= 0}
-            className="mt-4 w-full rounded-full bg-amber-400 px-8 py-4 text-sm font-bold uppercase tracking-wider text-stone-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-amber-400/50 disabled:cursor-not-allowed disabled:bg-stone-600 disabled:text-stone-300 disabled:shadow-none disabled:hover:translate-y-0 sm:w-auto"
-          >
-            {availableCopies <= 0 ? "Not Available" : "Borrow"}
-          </button>
+        <DialogTrigger
+          disabled={availableCopies <= 0}
+          className="mt-4 w-full rounded-full bg-amber-400 px-8 py-4 text-sm font-bold uppercase tracking-wider text-stone-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-amber-400/50 disabled:cursor-not-allowed disabled:bg-stone-600 disabled:text-stone-300 disabled:shadow-none disabled:hover:translate-y-0 sm:w-auto"
+        >
+          {availableCopies <= 0 ? "Not Available" : "Borrow"}
         </DialogTrigger>
 
         <DialogContent className="sm:max-w-md">

@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { apiUrl } from "@/lib/api-url";
 
 const NewArrivalContent = async () => {
-  const res = await fetch("http://localhost:5000/new-arrival", {
+  const res = await fetch(apiUrl("/new-arrival"), {
     cache: "no-store",
   });
   const books = await res.json();

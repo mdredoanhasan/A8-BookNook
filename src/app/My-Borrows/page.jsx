@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import ToastOnMount from "@/components/ToastOnMount";
 import BorrowTable from "./borrowTable";
+import { apiUrl } from "@/lib/api-url";
 
 async function MyBorrowContent() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -27,7 +28,7 @@ async function MyBorrowContent() {
   let borrows;
   try {
     const { token } = await auth.api.getToken({ headers: await headers() });
-    const res = await fetch(`http://localhost:5000/My-Borrows/${email}`, {
+    const res = await fetch(apiUrl(`/My-Borrows/${encodeURIComponent(email)}`), {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });

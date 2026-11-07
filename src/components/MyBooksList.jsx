@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { toast } from "@/components/ui/toast";
 import { authFetch } from "@/lib/authFetch";
+import { apiUrl } from "@/lib/api-url";
 
 const categories = ["Fiction", "Science", "History", "Kids", "Others"];
 
@@ -36,7 +37,7 @@ const MyBooksList = ({ books }) => {
     const updatedData = Object.fromEntries(new FormData(e.target).entries());
 
     try {
-      const response = await authFetch (`http://localhost:5000/Books/${id}`, {
+      const response = await authFetch(apiUrl(`/Books/${id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),
@@ -81,7 +82,7 @@ const MyBooksList = ({ books }) => {
     }
 
     try {
-      const response = await authFetch (`http://localhost:5000/Books/${id}`, {
+      const response = await authFetch(apiUrl(`/Books/${id}`), {
         method: "DELETE",
       });
       if (!response.ok) {

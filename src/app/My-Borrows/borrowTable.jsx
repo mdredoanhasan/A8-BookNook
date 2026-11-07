@@ -1,20 +1,29 @@
 "use client";
 import { useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/toast";
 import { authFetch } from "@/lib/authFetch";
+import { apiUrl } from "@/lib/api-url";
 
 function formatDate(value) {
+  if (!value) return "Invalid date";
+
   const date = new Date(value);
-  if (!value || Number.isNaN(date.getTime())) return "Invalid date";
+  if (Number.isNaN(date.getTime())) return "Invalid date";
 
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "Asia/Dhaka",
+  }).formatToParts(date);
+  const datePart = (type) => parts.find((part) => part.type === type)?.value;
 
-  return `${day}-${month}-${year}`;
+  return `${datePart("day")}-${datePart("month")}-${datePart("year")}`;
 }
 
 export default function BorrowTable({ borrows }) {
+  const router = useRouter();
   const [borrowRows, setBorrowRows] = useState(borrows);
   const [returningId, setReturningId] = useState(null);
 
@@ -31,7 +40,7 @@ export default function BorrowTable({ borrows }) {
     setReturningId(borrowId);
 
     try {
-      const res = await authFetch (`http://localhost:5000/Borrows/${borrowId}`, {
+      const res = await authFetch(apiUrl(`/Borrows/${borrowId}`), {
         method: "DELETE",
       });
 
@@ -40,6 +49,7 @@ export default function BorrowTable({ borrows }) {
       setBorrowRows((currentBorrows) =>
         currentBorrows.filter((borrow) => borrow._id !== borrowId)
       );
+      router.refresh();
       toast.add({
         title: "Book returned",
         description: "The book was removed from your borrows.",

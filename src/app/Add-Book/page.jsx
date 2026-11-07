@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "@/components/ui/toast";
 import { authFetch } from "@/lib/authFetch";
+import { apiUrl } from "@/lib/api-url";
 
 const categories = ["Fiction", "Science", "History", "Kids", "Others"];
 
@@ -24,6 +26,7 @@ const readOnlyClass =
 const labelClass = "mb-2 block text-sm font-medium text-stone-300";
 
 export default function AddBookPage() {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
   const user = session?.user;
 
@@ -77,13 +80,15 @@ export default function AddBookPage() {
         email: user?.email,
       };
 
-      const res = await authFetch("http://localhost:5000/Add-Books", {
+      const res = await authFetch(apiUrl("/Add-Books"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(book),
       });
       if (!res.ok) {
-        throw new Error(`Saving the book failed (server returned ${res.status}).`);
+        throw new Error(
+          `Saving the book failed (server returned ${res.status}).`,
+        );
       }
 
       formElement.reset();
@@ -95,6 +100,7 @@ export default function AddBookPage() {
         description: "The book is now in the library.",
         type: "success",
       });
+      router.push("/All-Books");
     } catch (err) {
       console.error("Failed to add book:", err);
       toast.add({

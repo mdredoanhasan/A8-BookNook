@@ -1,11 +1,12 @@
 import BorrowButton from "@/components/borrowButton";
 import Link from "next/link";
 import { Suspense } from "react";
+import { apiUrl } from "@/lib/api-url";
 
 const BookDetailsContent = async ({ params }) => {
   const { id } = await params;
 
-  const res = await fetch(`http://localhost:5000/All-Books/${id}`, {
+  const res = await fetch(apiUrl(`/All-Books/${id}`), {
     cache: "no-store",
   });
   const book = await res.json();

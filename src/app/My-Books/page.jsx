@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import MyBooksList from "@/components/MyBooksList";
+import { apiUrl } from "@/lib/api-url";
 
 const MyBooksContent = async () => {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -10,14 +11,23 @@ const MyBooksContent = async () => {
 
   if (!email) redirect("/sign-in");
 
-  const res = await fetch(`http://localhost:5000/My-Books/${email}`, {
+  const requestHeaders = await headers();
+  const { token } = await auth.api.getToken({ headers: requestHeaders });
+  const res = await fetch(apiUrl(`/My-Books/${encodeURIComponent(email)}`), {
+    headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
-  const data = await res.json();
-  console.log("MYBOOKS RAW:", data);
+  if (!res.ok) {
+    throw new Error(`Could not load your books (server returned ${res.status}).`);
+  }
 
-  // remove null items, and use an empty list if the server sent something else
-  const mybooks = Array.isArray(data) ? data.filter(Boolean) : [];
+  const data = await res.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error("The server returned an invalid books list.");
+  }
+
+  const mybooks = data.filter(Boolean);
 
   return (
     <main className="relative overflow-hidden bg-stone-950 px-6 py-16">

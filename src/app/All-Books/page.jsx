@@ -1,9 +1,10 @@
 
 import Link from "next/link";
 import { Suspense } from "react";
+import { apiUrl } from "@/lib/api-url";
 
 async function AllBooksContent() {
-  const res = await fetch("http://localhost:5000/All-Books", {
+  const res = await fetch(apiUrl("/All-Books"), {
     cache: "no-store",
   });
   const books = await res.json();

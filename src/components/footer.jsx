@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa";
 
-// TODO: replace these with your real details
 const contact = {
   email: "redoanhasan02@gmail.com",
   location: "Dhaka, Bangladesh",
