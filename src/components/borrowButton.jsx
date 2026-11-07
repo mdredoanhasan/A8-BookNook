@@ -21,9 +21,7 @@ const BorrowButton = ({ book }) => {
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const user = session?.user;
-  const totalCopies = Number(
-    book.totalCopies ?? book.availableCopies ?? 1,
-  );
+  const totalCopies = Number(book.totalCopies ?? book.availableCopies ?? 1);
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -107,7 +105,7 @@ const BorrowButton = ({ book }) => {
           disabled={availableCopies <= 0}
           className="mt-4 w-full rounded-full bg-amber-400 px-8 py-4 text-sm font-bold uppercase tracking-wider text-stone-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-amber-400/50 disabled:cursor-not-allowed disabled:bg-stone-600 disabled:text-stone-300 disabled:shadow-none disabled:hover:translate-y-0 sm:w-auto"
         >
-          {availableCopies <= 0 ? "Not Available" : "Borrow"}
+          {availableCopies <= 0 ? "Not Available" : "Borrow This Book"}
         </DialogTrigger>
 
         <DialogContent className="sm:max-w-md">
