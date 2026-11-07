@@ -27,52 +27,83 @@ export default function AddBookPage() {
   const [form, setForm] = useState(initialState);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError("");
+    setSuccess("");
   };
 
   const handleFile = (e) => {
-    const selected = e.target.files[0];
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
+    setError("");
+    setSuccess("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formElement = e.target;
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
 
-    // 1) upload the image to imgbb
-    const imgData = new FormData();
-    imgData.append("image", file);
+    try {
+      if (!file) {
+        throw new Error("Please choose a book image.");
+      }
 
-    const imgRes = await fetch(
-      `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_KEY}`,
-      { method: "POST", body: imgData }
-    );
-    const imgJson = await imgRes.json();
+      const imgData = new FormData();
+      imgData.append("image", file);
 
-    // 2) send the book to the server
-    const book = {
-      ...form,
-      image: imgJson.data.url,
-      addedByName: user?.name,
-      addedBy: user?.email,
-    };
+      const imgRes = await fetch("/api/upload-image", {
+        method: "POST",
+        body: imgData,
+      });
+      const imgResult = await imgRes.json();
+      const imageUrl = imgResult?.url;
+      if (!imgRes.ok || !imageUrl) {
+        throw new Error(imgResult?.error || "Image upload failed.");
+      }
 
-    const res = await fetch("http://localhost:5000/Add-Books", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(book),
-    });
-    const data = await res.json();
-    console.log(data);
+      const book = {
+        ...form,
+        image: imageUrl,
+        addedByName: user?.name,
+        addedBy: user?.email,
+        email: user?.email,
+      };
 
-    // 3) reset the form
-    formElement.reset();
-    setForm(initialState);
-    setFile(null);
-    setPreview("");
+      const res = await fetch("http://localhost:5000/Add-Books", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(book),
+      });
+      if (!res.ok) {
+        throw new Error(`Saving the book failed (server returned ${res.status}).`);
+      }
+
+      formElement.reset();
+      setForm(initialState);
+      setFile(null);
+      setPreview("");
+      setSuccess("Book added successfully.");
+    } catch (err) {
+      console.error("Failed to add book:", err);
+      setError(
+        err instanceof TypeError
+          ? "Could not connect to the image service or book server. Check your connection and make sure the book server is running."
+          : err.message || "Could not add the book. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -218,6 +249,23 @@ export default function AddBookPage() {
             />
           </div>
 
+          {error && (
+            <p
+              role="alert"
+              className="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300"
+            >
+              {error}
+            </p>
+          )}
+          {success && (
+            <p
+              role="status"
+              className="rounded-2xl border border-green-400/30 bg-green-400/10 px-4 py-3 text-sm text-green-300"
+            >
+              {success}
+            </p>
+          )}
+
           {/* User (read-only) */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
@@ -248,9 +296,10 @@ export default function AddBookPage() {
 
           <button
             type="submit"
+            disabled={submitting}
             className="w-full rounded-full bg-amber-400 px-8 py-4 text-sm font-bold uppercase tracking-wider text-stone-950 shadow-lg shadow-amber-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-amber-400/50"
           >
-            Add Book
+            {submitting ? "Adding Book..." : "Add Book"}
           </button>
         </form>
       </div>
