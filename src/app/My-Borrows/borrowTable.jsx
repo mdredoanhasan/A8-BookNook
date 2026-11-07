@@ -1,5 +1,6 @@
 "use client";
 import { useState, Suspense } from "react";
+import { toast } from "@/components/ui/toast";
 
 function formatDate(value) {
   const date = new Date(value);
@@ -15,16 +16,18 @@ function formatDate(value) {
 export default function BorrowTable({ borrows }) {
   const [borrowRows, setBorrowRows] = useState(borrows);
   const [returningId, setReturningId] = useState(null);
-  const [error, setError] = useState("");
 
   const handleReturnBook = async (borrowId) => {
     if (!borrowId) {
-      setError("Could not return this book because its record ID is missing.");
+      toast.add({
+        title: "Unable to return book",
+        description: "The borrow record ID is missing.",
+        type: "error",
+      });
       return;
     }
 
     setReturningId(borrowId);
-    setError("");
 
     try {
       const res = await fetch(`http://localhost:5000/Borrows/${borrowId}`, {
@@ -36,9 +39,21 @@ export default function BorrowTable({ borrows }) {
       setBorrowRows((currentBorrows) =>
         currentBorrows.filter((borrow) => borrow._id !== borrowId)
       );
+      toast.add({
+        title: "Book returned",
+        description: "The book was removed from your borrows.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Failed to return book:", error);
-      setError("Could not return this book. Please try again.");
+      toast.add({
+        title: "Unable to return book",
+        description:
+          error instanceof TypeError
+            ? "Could not connect to the book server."
+            : "Please try again.",
+        type: "error",
+      });
     } finally {
       setReturningId(null);
     }
@@ -125,11 +140,6 @@ export default function BorrowTable({ borrows }) {
             </tbody>
           </table>
         </div>
-        {error && (
-          <p role="alert" className="mt-4 text-sm text-red-300">
-            {error}
-          </p>
-        )}
       </div>
     </Suspense>
   );

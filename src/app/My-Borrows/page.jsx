@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
+import ToastOnMount from "@/components/ToastOnMount";
 import BorrowTable from "./borrowTable";
 
 async function MyBorrowContent() {
@@ -23,31 +24,25 @@ async function MyBorrowContent() {
     );
   }
 
-  const res = await fetch(
-    `http://localhost:5000/My-Borrows/${email}`,
-    { cache: "no-store" }
-  );
+  let borrows;
+  try {
+    const res = await fetch(`http://localhost:5000/My-Borrows/${email}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("Could not load your borrowed books.");
 
-  if (!res.ok) {
+    borrows = await res.json();
+    if (!Array.isArray(borrows)) {
+      throw new Error("The server returned an invalid borrowed-books list.");
+    }
+  } catch (error) {
     return (
       <main className="bg-stone-950 px-6 py-20 text-center text-stone-300">
         <h1 className="text-3xl font-bold text-white">My Borrows</h1>
-        <p className="mt-4" role="alert">
-          Could not load your borrowed books. Please try again later.
-        </p>
-      </main>
-    );
-  }
-
-  const borrows = await res.json();
-
-  if (!Array.isArray(borrows)) {
-    return (
-      <main className="bg-stone-950 px-6 py-20 text-center text-stone-300">
-        <h1 className="text-3xl font-bold text-white">My Borrows</h1>
-        <p className="mt-4" role="alert">
-          The server returned an invalid borrowed-books list.
-        </p>
+        <ToastOnMount
+          title="Unable to load borrows"
+          description={error.message || "Please try again later."}
+        />
       </main>
     );
   }

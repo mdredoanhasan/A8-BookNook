@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "@/components/ui/toast";
 
 const categories = ["Fiction", "Science", "History", "Kids", "Others"];
 
@@ -16,52 +17,94 @@ const MyBooksList = ({ books }) => {
   );
   const [editBook, setEditBook] = useState(null);
   const [deleteBook, setDeleteBook] = useState(null);
-  const [toast, setToast] = useState("");
-
-  // never contains null, even after a hot reload
   const safeList = list.filter(Boolean);
-
-  const showToast = (text) => {
-    setToast(text);
-    setTimeout(() => setToast(""), 3000);
-  };
 
   const handleSave = async (e) => {
     e.preventDefault();
 
     const id = editBook?._id;
+    if (!id) {
+      toast.add({
+        title: "Unable to update book",
+        description: "The book ID is missing.",
+        type: "error",
+      });
+      return;
+    }
 
-    // title, author, category and description from the form
     const updatedData = Object.fromEntries(new FormData(e.target).entries());
 
-    await fetch(`http://localhost:5000/Books/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedData),
-    });
+    try {
+      const response = await fetch(`http://localhost:5000/Books/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      });
+      if (!response.ok) {
+        throw new Error(`The server returned ${response.status}.`);
+      }
 
-    // update the card on the screen
-    setList((prev) =>
-      prev.map((book) =>
-        book?._id === id ? { ...book, ...updatedData } : book,
-      ),
-    );
-
-    setEditBook(null);
-    showToast("Book updated successfully!");
+      setList((prev) =>
+        prev.map((book) =>
+          book?._id === id ? { ...book, ...updatedData } : book,
+        ),
+      );
+      setEditBook(null);
+      toast.add({
+        title: "Book updated",
+        description: "Your changes were saved.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to update book:", error);
+      toast.add({
+        title: "Unable to update book",
+        description:
+          error instanceof TypeError
+            ? "Could not connect to the book server."
+            : error.message,
+        type: "error",
+      });
+    }
   };
 
   const handleDelete = async () => {
     const id = deleteBook?._id;
+    if (!id) {
+      toast.add({
+        title: "Unable to delete book",
+        description: "The book ID is missing.",
+        type: "error",
+      });
+      return;
+    }
 
-    await fetch(`http://localhost:5000/Books/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      const response = await fetch(`http://localhost:5000/Books/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`The server returned ${response.status}.`);
+      }
 
-    // remove the book from the UI
-    setList((prev) => prev.filter((book) => book?._id !== id));
-    setDeleteBook(null);
-    showToast("Book deleted successfully!");
+      setList((prev) => prev.filter((book) => book?._id !== id));
+      setDeleteBook(null);
+      toast.add({
+        title: "Book deleted",
+        description: "The book was removed from your library.",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to delete book:", error);
+      toast.add({
+        title: "Unable to delete book",
+        description:
+          error instanceof TypeError
+            ? "Could not connect to the book server."
+            : error.message,
+        type: "error",
+      });
+    }
   };
 
   return (
@@ -301,31 +344,6 @@ const MyBooksList = ({ books }) => {
         </div>
       )}
 
-      {/* ---------- Success toast ---------- */}
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-6 right-6 z-[60] flex items-center gap-3 rounded-2xl border border-emerald-400/30 bg-stone-950 px-5 py-4 shadow-2xl shadow-black/50"
-        >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400 text-stone-950">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3.5"
-              className="h-3.5 w-3.5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          </span>
-          <p className="text-sm font-medium text-white">{toast}</p>
-        </div>
-      )}
     </>
   );
 };

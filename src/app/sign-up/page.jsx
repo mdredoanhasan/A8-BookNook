@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { authClient } from "../../lib/auth-client";
+import { toast } from "@/components/ui/toast";
 import { FcGoogle } from "react-icons/fc";
 import { redirect } from "next/navigation";
 
@@ -20,31 +21,54 @@ export default function SignUpPage() {
   });
   const [show, setShow] = useState(false);
   const [agree, setAgree] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (form.password.length < 6) {
-      return setError("Password must be at least 6 characters.");
+      toast.add({
+        title: "Invalid password",
+        description: "Password must be at least 6 characters.",
+        type: "error",
+      });
+      return;
     }
     if (!/[A-Z]/.test(form.password)) {
-      return setError("Password must contain at least one uppercase letter.");
+      toast.add({
+        title: "Invalid password",
+        description: "Password must contain at least one uppercase letter.",
+        type: "error",
+      });
+      return;
     }
     if (!/[a-z]/.test(form.password)) {
-      return setError("Password must contain at least one lowercase letter.");
+      toast.add({
+        title: "Invalid password",
+        description: "Password must contain at least one lowercase letter.",
+        type: "error",
+      });
+      return;
     }
     if (form.password !== form.confirm) {
-      return setError("Passwords do not match.");
+      toast.add({
+        title: "Passwords do not match",
+        description: "Enter the same password in both fields.",
+        type: "error",
+      });
+      return;
     }
     if (!agree) {
-      return setError("Please accept the terms to continue.");
+      toast.add({
+        title: "Terms not accepted",
+        description: "Please accept the terms to continue.",
+        type: "error",
+      });
+      return;
     }
 
     setLoading(true);
@@ -56,29 +80,58 @@ export default function SignUpPage() {
       result = await authClient.signUp.email({ ...user });
     } catch (err) {
       console.error("Sign up failed:", err);
-      setError("Could not create your account. Please try again.");
+      toast.add({
+        title: "Sign up failed",
+        description: "Could not create your account. Please try again.",
+        type: "error",
+      });
       setLoading(false);
       return;
     }
 
     setLoading(false);
     if (result.error) {
-      setError(result.error.message || "Could not create your account.");
+      toast.add({
+        title: "Sign up failed",
+        description: result.error.message || "Could not create your account.",
+        type: "error",
+      });
       return;
     }
     if (result.data) {
+      toast.add({
+        title: "Account created",
+        description: "Your account was created successfully.",
+        type: "success",
+      });
       redirect("/");
     }
   };
 
   const handleGoogle = async () => {
     setLoading(true);
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/",
-    });
-    // The browser leaves for Google here, so there is no code after this.
-    setLoading(false);
+    try {
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+      if (error) {
+        toast.add({
+          title: "Google sign-in failed",
+          description: error.message || "Could not continue with Google.",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Google sign-in failed:", error);
+      toast.add({
+        title: "Google sign-in failed",
+        description: "Could not continue with Google. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -209,7 +262,6 @@ export default function SignUpPage() {
                 checked={agree}
                 onChange={(e) => {
                   setAgree(e.target.checked);
-                  setError("");
                 }}
                 className="mt-0.5 h-4 w-4 rounded accent-amber-400"
               />
@@ -220,15 +272,6 @@ export default function SignUpPage() {
                 </Link>
               </span>
             </label>
-
-            {error && (
-              <p
-                role="alert"
-                className="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300"
-              >
-                {error}
-              </p>
-            )}
 
             <button
               type="submit"

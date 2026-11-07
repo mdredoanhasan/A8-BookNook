@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "@/components/ui/toast";
 
 const categories = ["Fiction", "Science", "History", "Kids", "Others"];
 
@@ -28,13 +29,9 @@ export default function AddBookPage() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError("");
-    setSuccess("");
   };
 
   const handleFile = (e) => {
@@ -43,16 +40,12 @@ export default function AddBookPage() {
 
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
-    setError("");
-    setSuccess("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formElement = e.target;
     setSubmitting(true);
-    setError("");
-    setSuccess("");
 
     try {
       if (!file) {
@@ -93,14 +86,21 @@ export default function AddBookPage() {
       setForm(initialState);
       setFile(null);
       setPreview("");
-      setSuccess("Book added successfully.");
+      toast.add({
+        title: "Book added",
+        description: "The book is now in the library.",
+        type: "success",
+      });
     } catch (err) {
       console.error("Failed to add book:", err);
-      setError(
-        err instanceof TypeError
-          ? "Could not connect to the image service or book server. Check your connection and make sure the book server is running."
-          : err.message || "Could not add the book. Please try again."
-      );
+      toast.add({
+        title: "Unable to add book",
+        description:
+          err instanceof TypeError
+            ? "Could not connect to the image service or book server. Check your connection and make sure the book server is running."
+            : err.message || "Could not add the book. Please try again.",
+        type: "error",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -248,23 +248,6 @@ export default function AddBookPage() {
               className={`${inputClass} resize-none`}
             />
           </div>
-
-          {error && (
-            <p
-              role="alert"
-              className="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-300"
-            >
-              {error}
-            </p>
-          )}
-          {success && (
-            <p
-              role="status"
-              className="rounded-2xl border border-green-400/30 bg-green-400/10 px-4 py-3 text-sm text-green-300"
-            >
-              {success}
-            </p>
-          )}
 
           {/* User (read-only) */}
           <div className="grid gap-6 sm:grid-cols-2">

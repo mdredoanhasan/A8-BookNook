@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { toast } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,
@@ -48,11 +49,22 @@ const BorrowButton = ({ book }) => {
 
       if (!res.ok) throw new Error("Failed to borrow book");
 
-      const result = await res.json();
-      console.log(result);
       setOpen(false);
+      toast.add({
+        title: "Book borrowed",
+        description: "The book was added to your borrows.",
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
+      toast.add({
+        title: "Unable to borrow book",
+        description:
+          err instanceof TypeError
+            ? "Could not connect to the book server."
+            : err.message || "Please try again.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
