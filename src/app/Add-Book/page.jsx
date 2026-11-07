@@ -11,6 +11,7 @@ const initialState = {
   author: "",
   category: "Fiction",
   description: "",
+  totalCopies: "1",
 };
 
 const inputClass =
@@ -67,6 +68,8 @@ export default function AddBookPage() {
 
       const book = {
         ...form,
+        totalCopies: Number(form.totalCopies),
+        availableCopies: Number(form.totalCopies),
         image: imageUrl,
         addedByName: user?.name,
         addedBy: user?.email,
@@ -180,6 +183,23 @@ export default function AddBookPage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label htmlFor="totalCopies" className={labelClass}>
+              Total Copies
+            </label>
+            <input
+              id="totalCopies"
+              name="totalCopies"
+              type="number"
+              min="1"
+              step="1"
+              required
+              value={form.totalCopies}
+              onChange={handleChange}
+              className={inputClass}
+            />
           </div>
 
           {/* Image */}
