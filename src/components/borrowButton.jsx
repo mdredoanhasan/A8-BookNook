@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authFetch } from "@/lib/authFetch";
 
 const BorrowButton = ({ book }) => {
   const { data: session } = authClient.useSession();
@@ -51,7 +52,7 @@ const BorrowButton = ({ book }) => {
         returnDate: next7.toISOString(),
       };
 
-      const res = await fetch("http://localhost:5000/Books", {
+      const res = await authFetch("http://localhost:5000/Books", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

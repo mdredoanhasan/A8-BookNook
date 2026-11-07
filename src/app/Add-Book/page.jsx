@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "@/components/ui/toast";
+import { authFetch } from "@/lib/authFetch";
 
 const categories = ["Fiction", "Science", "History", "Kids", "Others"];
 
@@ -76,7 +77,7 @@ export default function AddBookPage() {
         email: user?.email,
       };
 
-      const res = await fetch("http://localhost:5000/Add-Books", {
+      const res = await authFetch("http://localhost:5000/Add-Books", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(book),

@@ -26,7 +26,9 @@ async function MyBorrowContent() {
 
   let borrows;
   try {
+    const { token } = await auth.api.getToken({ headers: await headers() });
     const res = await fetch(`http://localhost:5000/My-Borrows/${email}`, {
+      headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
     if (!res.ok) throw new Error("Could not load your borrowed books.");

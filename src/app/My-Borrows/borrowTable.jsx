@@ -1,6 +1,7 @@
 "use client";
 import { useState, Suspense } from "react";
 import { toast } from "@/components/ui/toast";
+import { authFetch } from "@/lib/authFetch";
 
 function formatDate(value) {
   const date = new Date(value);
@@ -30,7 +31,7 @@ export default function BorrowTable({ borrows }) {
     setReturningId(borrowId);
 
     try {
-      const res = await fetch(`http://localhost:5000/Borrows/${borrowId}`, {
+      const res = await authFetch (`http://localhost:5000/Borrows/${borrowId}`, {
         method: "DELETE",
       });
 
