@@ -3,7 +3,16 @@ import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { jwt } from "better-auth/plugins";
 
-const client = new MongoClient(process.env.MONGODB_URL);
+const globalForMongo = globalThis;
+
+if (!globalForMongo._mongoClient) {
+  globalForMongo._mongoClient = new MongoClient(process.env.MONGODB_URL, {
+    maxIdleTimeMS: 5000,
+    serverSelectionTimeoutMS: 10000,
+  });
+}
+
+const client = globalForMongo._mongoClient;
 const db = client.db("BookNook");
 
 export const auth = betterAuth({
